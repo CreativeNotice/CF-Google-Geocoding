@@ -59,29 +59,31 @@ component {
 	 * @hint        Initializes our component default settings and allows for user preferred settings.
 	 * @returntype  component
 	 */
-	public function init(string address, string key, string language, string region, string components, string bounds, string endpoint, string output_type){
+	public function init( string key, string output_type, string endpoint, string address, string latlng, string components, string language, string region, string bounds ){
 		
-		// Some defaults
-		// We have to set defaults here because CF9 or earlier doesn't use the default value of a property unless you're using ORM.
-		// https://bugbase.adobe.com/index.cfm?event=bug&id=3041756
-		var endpoint_url = (structKeyExists(arguments,'endpoint') && len(arguments.endpoint)) ? trim(arguments.endpoint) : 'http://maps.googleapis.com/maps/api/geocode/';
-		var output       = (structKeyExists(arguments,'output_type') && len(arguments.output_type)) ? trim(arguments.output_type) : 'json';
-
 		// You may set your Google application API Key here or pass it through at initialization.
 		// Using an API key is optional but allows for API usage limits to be applied per application not per IP.
 		// https://developers.google.com/maps/documentation/geocoding/#api_key
-		var api_key = (structKeyExists(arguments,'key') && len(arguments.key)) ? trim(arguments.key) : 'abracadabra';
+		var api_key = (structKeyExists(arguments,'key') && len(arguments.key)) ? trim(arguments.key) : 'XXXXXXXXXXXXXXXX';
+
+		// Some defaults
+		// We have to set defaults here because CF9 or earlier doesn't use the default value of a property unless you're using ORM.
+		// https://bugbase.adobe.com/index.cfm?event=bug&id=3041756
+		var output       = (structKeyExists(arguments,'output_type') && len(arguments.output_type)) ? trim(arguments.output_type) : 'json';
+		var endpoint_url = (structKeyExists(arguments,'endpoint') && len(arguments.endpoint)) ? trim(arguments.endpoint) : 'http://maps.googleapis.com/maps/api/geocode/';
+
 
 		// Set our parameters if their values have been passed through during initialization.
-		setEndpoint(endpoint_url);
-		setOutput_type(output);
 		setKey(api_key);
+		setOutput_type(output);
+		setEndpoint(endpoint_url);
 
 		if( structKeyExists(arguments,'address') )   { setAddress( trim(arguments.address) ); }
+		if( structKeyExists(arguments,'latlng') )    { setAddress( trim(arguments.latlng) ); }
+		if( structKeyExists(arguments,'components') ){ setAddress( trim(arguments.components) ); }
 		if( structKeyExists(arguments,'language') )  { setAddress( trim(arguments.language) ); }
 		if( structKeyExists(arguments,'region') )    { setAddress( trim(arguments.region) ); }
 		if( structKeyExists(arguments,'bounds') )    { setAddress( trim(arguments.bounds) ); }
-		if( structKeyExists(arguments,'components') ){ setAddress( trim(arguments.components) ); }
 
 		return this;
 	};
