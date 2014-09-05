@@ -130,6 +130,33 @@ component {
 	 */
 	public function getGeocode( string address, string components, string bounds, string language, string region, required boolean simple=TRUE ){
 
+		// Check that we have either an address or components argument
+		if( structKeyExists(arguments,'address') && structKeyExists(arguments,'components') ){
+
+			// Set our properties
+			if( structKeyExists(arguments,'address') )   { setAddress( trim(arguments.address) ); }
+			if( structKeyExists(arguments,'components') ){ setComponents( trim(arguments.components) ); }
+			if( structKeyExists(arguments,'bounds') )    { setBounds( trim(arguments.bounds) ); }
+			if( structKeyExists(arguments,'language') )  { setLanaguage( trim(arguments.language) ); }
+			if( structKeyExists(arguments,'region') )    { setRegion( trim(arguments.region) ); }
+
+			var request = doRequest();
+
+			// @TODO: Format a simplified response
+			if( arguments.simple ){
+				// Simplify the raw API response before returning
+				var simple = {};
+
+				return simple;
+
+			}else{
+				// Raw API response should be returned
+				return request;
+			}
+
+		}else{
+			throw('You must provide either an address or component filter string in order to perform a geocode request.');
+		}
 	};
 
 	private function doRequest(){};
