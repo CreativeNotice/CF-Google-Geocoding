@@ -1,7 +1,8 @@
 /**
+* Provides easy access to Googles Geocoding API. See https://developers.google.com/maps/documentation/geocoding/ for API instructions.
+* Copyright (C) 2014 Ryan Mueller. Released under The MIT License (MIT). 
+* Contribute to this project at https://github.com/CreativeNotice/CF-Google-Geocoding.
 * @displayname CF-Google-Geocoding
-* @description Provides easy access to Googles Geocoding API. See https://github.com/CreativeNotice/CF-Google-Geocoding.
-* @see         https://developers.google.com/maps/documentation/geocoding/
 * @author      Ryan Mueller
 * @created     2014-09-03
 * @accessors   true
@@ -61,8 +62,9 @@ component {
 	property string region;
 
 	/**
-	 * Initializes our component default settings and allows for user preferred settings.
+	 * Initializes our component default settings or user preferred settings.
 	 * You may pass in your API key at component initialization by passing it in the key argument. If your app will use the same key, then just insert the API key below.
+	 * A note about using the SSL API URL. If you're using the HTTPS URL for the API, you may need to add Google's SSL certificate to your java keyring.
 	 * @displayname  Init
 	 * @key          The Google API key is technically optional, but API usage counts will be applied to your IP rather than application without one.
 	 * @responsetype The type of response you'd like to see from Google. Defaults to 'json'. Google supports 'json' or 'xml' types.
@@ -104,7 +106,7 @@ component {
 			// @TODO: Format a simplified response
 			if( arguments.simple ){
 				// Simplify the raw API response before returning
-				var simple = {};
+				var simple_struct = {};
 
 				return simple;
 
@@ -145,7 +147,7 @@ component {
 			// @TODO: Format a simplified response
 			if( arguments.simple ){
 				// Simplify the raw API response before returning
-				var simple = {};
+				var simple_struct = {};
 
 				return simple;
 
@@ -159,6 +161,12 @@ component {
 		}
 	};
 
+	/**
+	 * Performs the API http request. 
+	 * Remember if you're using the HTTPS URL for the API, you may need to add Google's SSL certificate to your java keyring.
+	 * @displayname Do Request
+	 * @returntype  Struct
+	 */
 	private function doRequest(){};
 
 	/**
