@@ -6,7 +6,7 @@
 * @author      Ryan Mueller
 * @created     2014-09-03
 * @accessors   true
-* @output      false
+* @output      true
 */
 component {
 
@@ -17,8 +17,21 @@ component {
 
 	/**
 	 * Google supports 'json' or 'xml' response types.
+	 * Note: At the time of this writing, this component only supports JSON.
 	 */
 	property string responsetype;
+
+	/**
+	 * Google allows several address types to be requested
+	 * https://developers.google.com/maps/documentation/geocoding/#Types
+	 */
+	property string resulttype;
+
+	/**
+	 * You can send Google a pipe (|) delimited list of locations types to limit results too.
+	 * https://developers.google.com/maps/documentation/geocoding/#ReverseGeocoding
+	 */
+	property string locationtype;
 
 	/**
 	 * The address you want to geocode
@@ -75,9 +88,9 @@ component {
 
 		// Set our parameters if their values have been passed through during initialization.
 		// We have to set defaults here because CF9 or earlier doesn't use the default value of a property unless you're using ORM.
-		setKey( trim(api_key) );
-		setResponseType( trim(output) );
-		setEndpoint( trim(endpoint_url) );
+		setKey( trim(key) );
+		setResponseType( trim(responsetype) );
+		setEndpoint( trim(endpoint) );
 
 		return this;
 	};
@@ -91,34 +104,34 @@ component {
 	 * @simple       If true we return only the first address structure. If false we return the entire API response.
 	 * @returntype   Struct
 	 */
-	public function getAddress( required string latlng, required string resulttype='street_address', required string locationtype='ROOFTOP', required boolean simple=TRUE ){
+	// public function getAddress( required string latlng, required string resulttype='street_address', required string locationtype='ROOFTOP', required boolean simple=TRUE ){
 
-		// Check that we have a good latlng string
-		// regex will match 40.714224,-73.961452
-		if( reFind('\d+\.\d+\,\-*\d+\.\d+', trim(arguments.latlng), FALSE) ){
+	// 	// Check that we have a good latlng string
+	// 	// regex will match 40.714224,-73.961452
+	// 	if( reFind('\d+\.\d+\,\-*\d+\.\d+', trim(arguments.latlng), FALSE) ){
 
-			setLatLng( trim(arguments.latlng) );
-			setResultType( trim(arguments.resulttype) );
-			setLocationType( trim(arguments.locationtype) );
+	// 		setLatLng( trim(arguments.latlng) );
+	// 		setResultType( trim(arguments.resulttype) );
+	// 		setLocationType( trim(arguments.locationtype) );
 
-			var request = doRequest();
+	// 		var request = doRequest();
 
-			// @TODO: Format a simplified response
-			if( arguments.simple ){
-				// Simplify the raw API response before returning
-				var simple_struct = {};
+	// 		// @TODO: Format a simplified response
+	// 		if( arguments.simple ){
+	// 			// Simplify the raw API response before returning
+	// 			var simple_struct = {};
 
-				return simple;
+	// 			return simple_struct;
 
-			}else{
-				// Raw API response should be returned
-				return request;
-			}
+	// 		}else{
+	// 			// Raw API response should be returned
+	// 			return request;
+	// 		}
 
-		}else{
-			throw('Please use the correct format for LatLng. E.g. 40.714224,-73.961452');
-		}
-	};
+	// 	}else{
+	// 		throw('Please use the correct format for LatLng. E.g. 40.714224,-73.961452');
+	// 	}
+	// };
 
 	/**
 	 * Performs an address lookup and returns the latitude and longitude.
@@ -128,37 +141,43 @@ component {
 	 * @language   The language in which to return results. If language is not supplied, the geocoder will attempt to use the native language of the domain from which the request is sent wherever possible.
 	 * @region     The region code, specified as a ccTLD ("top-level domain") two-character value. This parameter will only influence, not fully restrict, results from the geocoder. See https://developers.google.com/maps/documentation/geocoding/#RegionCodes.
 	 * @simple     If true, we return a structure containing only the latitude and longitude. If false, we return the entire API response.
-	 * @returntype Struct
+	 * @returntype Any
 	 */
 	public function getGeocode( string address, string components, string bounds, string language, string region, required boolean simple=TRUE ){
 
-		// Check that we have either an address or components argument
-		if( structKeyExists(arguments,'address') && structKeyExists(arguments,'components') ){
+			// Check that we have either an address or components argument
+			if( structKeyExists(arguments,'address') || structKeyExists(arguments,'components') ){
 
-			// Set our properties
-			if( structKeyExists(arguments,'address') )   { setAddress( trim(arguments.address) ); }
-			if( structKeyExists(arguments,'components') ){ setComponents( trim(arguments.components) ); }
-			if( structKeyExists(arguments,'bounds') )    { setBounds( trim(arguments.bounds) ); }
-			if( structKeyExists(arguments,'language') )  { setLanaguage( trim(arguments.language) ); }
-			if( structKeyExists(arguments,'region') )    { setRegion( trim(arguments.region) ); }
+				// Set our properties
+				if( structKeyExists(arguments,'address') )   { setAddress( trim(arguments.address) ); }
+				if( structKeyExists(arguments,'components') ){ setComponents( trim(arguments.components) ); }
+				if( structKeyExists(arguments,'bounds') )    { setBounds( trim(arguments.bounds) ); }
+				if( structKeyExists(arguments,'language') )  { setLanaguage( trim(arguments.language) ); }
+				if( structKeyExists(arguments,'region') )    { setRegion( trim(arguments.region) ); }
 
-			var request = doRequest();
+				var request = doRequest();
 
-			// @TODO: Format a simplified response
-			if( arguments.simple ){
-				// Simplify the raw API response before returning
-				var simple_struct = {};
+				WriteDump( request );
 
-				return simple;
+				// @TODO: Format a simplified response
+				if( arguments.simple ){
+					// Simplify the raw API response before returning
+					var simple_struct = {
+						'formatted_address' = request.results[1].formatted_address,
+						'location'          = request.results[1].geometry.location,
+						'location_type'     = request.results[1].geometry.location_type
+					};
+
+					return simple_struct;
+
+				}else{
+					// Raw API response should be returned
+					return request.result;
+				}
 
 			}else{
-				// Raw API response should be returned
-				return request;
+				throw('You must provide either an address or component filter string in order to perform a geocode request.');
 			}
-
-		}else{
-			throw('You must provide either an address or component filter string in order to perform a geocode request.');
-		}
 	};
 
 	/**
@@ -167,16 +186,32 @@ component {
 	 * @displayname Do Request
 	 * @returntype  Struct
 	 */
-	private function doRequest(){};
+	private function doRequest(){
+
+		var http = new http();
+		http.setMethod('get');
+		http.setCharset('utf-8');
+		http.setUrl( createFinalURL() );
+
+		var response = DeserializeJSON( http.send().getPrefix().filecontent );
+
+		if( response.status == 'OK' ){
+			return response;
+		}else{
+			// See https://developers.google.com/maps/documentation/geocoding/#StatusCodes
+			var addl_error_msg = (structKeyExists(response,'error_message')) ? response.error_message: '';
+			throw('There was a non-OK response from Google: '& response.status &' - '& addl_error_msg);
+		}
+	};
 
 	/**
+	 * Returns a URL string using the property values to build a valid URL for hitting the Google Geocoding API.
 	 * @displayname Create Final URL
-	 * @hint        Returns a URL string using the property values to build a valid URL for hitting the Google Geocoding API.
 	 * @returntype  String
 	 */
 	private function createFinalURL(){
 
-		var url = getEndpoint() & getOutput_type() & '?';
+		var url = getEndpoint() & getResponseType() & '?';
 
 		// Do we have an address?
 		if( len( getAddress() ) ){ url &= 'address='& getAddress(); }
