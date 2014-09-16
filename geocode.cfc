@@ -155,12 +155,12 @@ component {
 				if( structKeyExists(arguments,'language') )  { setLanaguage( trim(arguments.language) ); }
 				if( structKeyExists(arguments,'region') )    { setRegion( trim(arguments.region) ); }
 
-				var request = doRequest();
+				var request  = doRequest();
+				var response = {};
 
-				WriteDump( request );
-
-				// @TODO: Format a simplified response
+				// Format a simplified response
 				if( arguments.simple ){
+
 					// Simplify the raw API response before returning
 					var simple_struct = {
 						'formatted_address' = request.results[1].formatted_address,
@@ -168,12 +168,14 @@ component {
 						'location_type'     = request.results[1].geometry.location_type
 					};
 
-					return simple_struct;
+					response = simple_struct;
 
 				}else{
 					// Raw API response should be returned
-					return request.result;
+					response = request.result;
 				}
+
+				return response;
 
 			}else{
 				throw('You must provide either an address or component filter string in order to perform a geocode request.');
