@@ -6,7 +6,6 @@
 * @author      Ryan Mueller
 * @created     2014-09-03
 * @accessors   true
-* @output      true
 */
 component {
 
@@ -153,41 +152,41 @@ component {
 	 */
 	public function getGeocode( string address, string components, string bounds, string language, string region, required boolean simple=TRUE ){
 
-			// Check that we have either an address or components argument
-			if( structKeyExists(arguments,'address') || structKeyExists(arguments,'components') ){
+		// Check that we have either an address or components argument
+		if( structKeyExists(arguments,'address') || structKeyExists(arguments,'components') ){
 
-				// Set our properties
-				if( structKeyExists(arguments,'address') )   { setAddress( trim(arguments.address) ); }
-				if( structKeyExists(arguments,'components') ){ setComponents( trim(arguments.components) ); }
-				if( structKeyExists(arguments,'bounds') )    { setBounds( trim(arguments.bounds) ); }
-				if( structKeyExists(arguments,'language') )  { setLanaguage( trim(arguments.language) ); }
-				if( structKeyExists(arguments,'region') )    { setRegion( trim(arguments.region) ); }
+			// Set our properties
+			if( structKeyExists(arguments,'address') )   { setAddress( trim(arguments.address) ); }
+			if( structKeyExists(arguments,'components') ){ setComponents( trim(arguments.components) ); }
+			if( structKeyExists(arguments,'bounds') )    { setBounds( trim(arguments.bounds) ); }
+			if( structKeyExists(arguments,'language') )  { setLanaguage( trim(arguments.language) ); }
+			if( structKeyExists(arguments,'region') )    { setRegion( trim(arguments.region) ); }
 
-				var request  = doRequest();
-				var response = {};
+			var request  = doRequest();
+			var response = {};
 
-				// Format a simplified response
-				if( arguments.simple ){
+			// Format a simplified response
+			if( arguments.simple ){
 
-					// Simplify the raw API response before returning
-					var simple_struct = {
-						'formatted_address' = request.results[1].formatted_address,
-						'location'          = request.results[1].geometry.location,
-						'location_type'     = request.results[1].geometry.location_type
-					};
+				// Simplify the raw API response before returning
+				var simple_struct = {
+					'formatted_address' = request.results[1].formatted_address,
+					'location'          = request.results[1].geometry.location,
+					'location_type'     = request.results[1].geometry.location_type
+				};
 
-					response = simple_struct;
-
-				}else{
-					// Raw API response should be returned
-					response = request.result;
-				}
-
-				return response;
+				response = simple_struct;
 
 			}else{
-				throw('You must provide either an address or component filter string in order to perform a geocode request.');
+				// Raw API response should be returned
+				response = request.result;
 			}
+
+			return response;
+
+		}else{
+			throw('You must provide either an address or component filter string in order to perform a geocode request.');
+		}
 	};
 
 	/**
