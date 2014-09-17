@@ -96,42 +96,50 @@ component {
 	};
 
 	/**
-	 * Performs a reverse address lookup. Provide a latitude, longitude string and get back address(es).
+	 * Performs an address lookup. Provide a latitude, longitude string and get back address(es).
 	 * See https://developers.google.com/maps/documentation/geocoding/#ReverseGeocoding.
-	 * @displayname  Get Address
+	 * @displayname  Get Reverse Geocode
+	 * @latlng       The latitude,longitude CSV
 	 * @resulttype   The type of result you'd like to see.
-	 * @locationtype The type of location to look for.
-	 * @simple       If true we return only the first address structure. If false we return the entire API response.
+	 * @locationtype The type of location to limit results to.
+	 * @simple       If true we return only the essential address and type. If false we return the entire API response.
 	 * @returntype   Struct
 	 */
-	// public function getAddress( required string latlng, required string resulttype='street_address', required string locationtype='ROOFTOP', required boolean simple=TRUE ){
+	public function getReverseGeocode( required string latlng, required string resulttype='', required string locationtype='', required boolean simple=TRUE ){
 
-	// 	// Check that we have a good latlng string
-	// 	// regex will match 40.714224,-73.961452
-	// 	if( reFind('\d+\.\d+\,\-*\d+\.\d+', trim(arguments.latlng), FALSE) ){
+		// Check that we have a good latlng string
+		// regex would match 40.714224,-73.961452
+		if( reFind('\d+\.\d+\,\-*\d+\.\d+', trim(arguments.latlng), FALSE) ){
 
-	// 		setLatLng( trim(arguments.latlng) );
-	// 		setResultType( trim(arguments.resulttype) );
-	// 		setLocationType( trim(arguments.locationtype) );
+			setLatLng( trim(arguments.latlng) );
+			setResultType( trim(arguments.resulttype) );
+			setLocationType( trim(arguments.locationtype) );
 
-	// 		var request = doRequest();
+			var request  = doRequest();
+			var response = {};
 
-	// 		// @TODO: Format a simplified response
-	// 		if( arguments.simple ){
-	// 			// Simplify the raw API response before returning
-	// 			var simple_struct = {};
+			// @TODO: Format a simplified response
+			if( arguments.simple ){
 
-	// 			return simple_struct;
+				// Simplify the raw API response before returning
+				var simple_struct = {
+					'formatted_address' = request.results[1].formatted_address,
+					'location_type'     = request.results[1].types[1]
+				};
 
-	// 		}else{
-	// 			// Raw API response should be returned
-	// 			return request;
-	// 		}
+				response = simple_struct;
 
-	// 	}else{
-	// 		throw('Please use the correct format for LatLng. E.g. 40.714224,-73.961452');
-	// 	}
-	// };
+			}else{
+				// Raw API response should be returned
+				response = request;
+			}
+
+			return response;
+
+		}else{
+			throw('Please use the correct format for LatLng. E.g. 40.714224,-73.961452');
+		}
+	};
 
 	/**
 	 * Performs an address lookup and returns the latitude and longitude.
@@ -140,8 +148,8 @@ component {
 	 * @bounds     The bounding box of the viewport within which to bias geocode results more prominently. This parameter will only influence, not fully restrict, results from the geocoder. See https://developers.google.com/maps/documentation/geocoding/#Viewports.
 	 * @language   The language in which to return results. If language is not supplied, the geocoder will attempt to use the native language of the domain from which the request is sent wherever possible.
 	 * @region     The region code, specified as a ccTLD ("top-level domain") two-character value. This parameter will only influence, not fully restrict, results from the geocoder. See https://developers.google.com/maps/documentation/geocoding/#RegionCodes.
-	 * @simple     If true, we return a structure containing only the latitude and longitude. If false, we return the entire API response.
-	 * @returntype Any
+	 * @simple     If true, we return a structure containing only essential parts of the results. If false, we return the entire API response.
+	 * @returntype Struct
 	 */
 	public function getGeocode( string address, string components, string bounds, string language, string region, required boolean simple=TRUE ){
 
@@ -201,8 +209,8 @@ component {
 			return response;
 		}else{
 			// See https://developers.google.com/maps/documentation/geocoding/#StatusCodes
-			var addl_error_msg = (structKeyExists(response,'error_message')) ? response.error_message: '';
-			throw('There was a non-OK response from Google: '& response.status &' - '& addl_error_msg);
+			var addl_error_msg = (structKeyExists(response,'error_message')) ? ' - '& response.error_message: '';
+			throw('There was a non-OK response from Google: '& response.status & addl_error_msg);
 		}
 	};
 
@@ -218,6 +226,9 @@ component {
 		// Do we have an address?
 		if( len( getAddress() ) ){ url &= 'address='& getAddress(); }
 
+		// Do we have a lat,lng pair?
+		if( len( getLatLng() ) ){ url &= 'latlng='& getLatLng(); }
+
 		// Are we passing components?
 		if( len( getComponents() ) ){ url &= '&components='& getComponents(); }
 
@@ -229,6 +240,12 @@ component {
 
 		// What about a region?
 		if( len( getRegion() ) ){ url &= '&region='& getRegion(); }
+
+		// What about a location type?
+		if( len( getLocationType() ) ){ url &= '&location_type='& getLocationType(); }
+
+		// What about a result type?
+		if( len( getResultType() ) ){ url &= '&result_type='& getResultType(); }
 
 		// Do we have an API Key?
 		if( len( getKey() ) ){ url &= '&key='& getKey(); }
