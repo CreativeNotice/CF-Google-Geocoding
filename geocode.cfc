@@ -105,7 +105,7 @@ component {
 	 * @simple       If true we return only the essential address and type. If false we return the entire API response.
 	 * @returntype   Struct
 	 */
-	public function getReverseGeocode( required string latlng, string resulttype='', required string locationtype='', required boolean simple=TRUE ){
+	public function getReverseGeocode( required string latlng, required string resulttype='', required string locationtype='', required boolean simple=TRUE ){
 
 		// Check that we have a good latlng string
 		// regex would match 40.714224,-73.961452
