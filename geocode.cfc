@@ -10,27 +10,27 @@
 component {
 
 	/**
-	 * The Google API endpoint URL.
+	 * The Google API end_point URL.
 	 */
-	property string endpoint;
+	property string end_point;
 
 	/**
 	 * Google supports 'json' or 'xml' response types.
 	 * Note: At the time of this writing, this component only supports JSON.
 	 */
-	property string responsetype;
+	property string response_type;
 
 	/**
 	 * Google allows several address types to be requested
 	 * https://developers.google.com/maps/documentation/geocoding/#Types
 	 */
-	property string resulttype;
+	property string result_type;
 
 	/**
 	 * You can send Google a pipe (|) delimited list of locations types to limit results too.
 	 * https://developers.google.com/maps/documentation/geocoding/#ReverseGeocoding
 	 */
-	property string locationtype;
+	property string location_type;
 
 	/**
 	 * The address you want to geocode
@@ -41,7 +41,7 @@ component {
 	 * A latitude,longitude coordinates to do a reverse address request.
 	 * See https://developers.google.com/maps/documentation/geocoding/#ReverseGeocoding
 	 */
-	property string latlng;
+	property string lat_lng;
 
 	/**
 	 * A component filter for which you wish to obtain a geocode. The components filter will also be accepted as an optional parameter if an address is provided. 
@@ -59,7 +59,7 @@ component {
 	 * Your application's API key. This key identifies your application for purposes of quota management.
 	 * See https://developers.google.com/maps/documentation/geocoding/#api_key
 	 */
-	property string key;
+	property string api_key;
 
 	/**
 	 * The language in which to return results. If language is not supplied, the geocoder will attempt to use the native language of the domain from which the request is sent wherever possible.
@@ -77,19 +77,18 @@ component {
 	 * Initializes our component default settings or user preferred settings.
 	 * You may pass in your API key at component initialization by passing it in the key argument. If your app will use the same key, then just insert the API key below.
 	 * A note about using the SSL API URL. If you're using the HTTPS URL for the API, you may need to add Google's SSL certificate to your java keyring.
-	 * @displayname  Init
-	 * @key          The Google API key is technically optional, but API usage counts will be applied to your IP rather than application without one.
-	 * @responsetype The type of response you'd like to see from Google. Defaults to 'json'. Google supports 'json' or 'xml' types.
-	 * @endpoint     The API URL.
-	 * @returntype   component
+	 * @displayname   Init
+	 * @key           The Google API key is technically optional, but API usage counts will be applied to your IP rather than application without one.
+	 * @response_type The type of response you'd like to see from Google. Defaults to 'json'. Google supports 'json' or 'xml' types.
+	 * @end_point     The API URL.
 	 */
-	public function init( required string key='', required string responsetype='json', required string endpoint='http://maps.googleapis.com/maps/api/geocode/' ){
+	public component function init( required string api_key='', required string response_type='json', required string end_point='http://maps.googleapis.com/maps/api/geocode/' ){
 
 		// Set our parameters if their values have been passed through during initialization.
 		// We have to set defaults here because CF9 or earlier doesn't use the default value of a property unless you're using ORM.
-		setKey( trim(key) );
-		setResponseType( trim(responsetype) );
-		setEndpoint( trim(endpoint) );
+		setApi_Key( api_key );
+		setResponse_Type( response_type );
+		setEnd_Point( end_point );
 
 		return this;
 	};
@@ -97,24 +96,23 @@ component {
 	/**
 	 * Performs an address lookup. Provide a latitude, longitude string and get back address(es).
 	 * See https://developers.google.com/maps/documentation/geocoding/#ReverseGeocoding.
-	 * @displayname  Get Reverse Geocode
-	 * @latlng       The latitude,longitude CSV
-	 * @resulttype   The type of result you'd like to see.
-	 * @locationtype The type of location to limit results to.
-	 * @simple       If true we return only the essential address and type. If false we return the entire API response.
-	 * @returntype   Struct
+	 * @displayname   Get Reverse Geocode
+	 * @lat_lng       The latitude,longitude CSV
+	 * @result_type   The type of result you'd like to see.
+	 * @location_type The type of location to limit results to.
+	 * @simple        If true we return only the essential address and type. If false we return the entire API response.
 	 */
-	public function getReverseGeocode( required string latlng, required string resulttype='', required string locationtype='', required boolean simple=TRUE ){
+	public struct function getReverseGeocode( required string lat_lng, required string result_type='', required string location_type='', required boolean simple=TRUE ){
 
-		// Check that we have a good latlng string
+		// Check that we have a good lat_lng string
 		// regex would match 40.714224,-73.961452
-		if( reFind('\d+\.\d+\,\-*\d+\.\d+', trim(arguments.latlng), FALSE) ){
+		if( reFind('\d+\.\d+\,\-*\d+\.\d+', arguments.lat_lng, FALSE) ){
 
-			setLatLng( trim(arguments.latlng) );
-			setResultType( trim(arguments.resulttype) );
-			setLocationType( trim(arguments.locationtype) );
+			setLat_Lng( arguments.lat_lng );
+			setResult_Type( arguments.result_type );
+			setLocation_Type( arguments.location_type );
 
-			var request  = doRequest();
+			var request  = makeApiRequest();
 			var response = {};
 
 			// @TODO: Format a simplified response
@@ -136,7 +134,7 @@ component {
 			return response;
 
 		}else{
-			throw('Please use the correct format for LatLng. E.g. 40.714224,-73.961452');
+			throw('Please use the correct format for Lat_Lng. E.g. 40.714224,-73.961452');
 		}
 	};
 
@@ -148,21 +146,20 @@ component {
 	 * @language   The language in which to return results. If language is not supplied, the geocoder will attempt to use the native language of the domain from which the request is sent wherever possible.
 	 * @region     The region code, specified as a ccTLD ("top-level domain") two-character value. This parameter will only influence, not fully restrict, results from the geocoder. See https://developers.google.com/maps/documentation/geocoding/#RegionCodes.
 	 * @simple     If true, we return a structure containing only essential parts of the results. If false, we return the entire API response.
-	 * @returntype Struct
 	 */
-	public function getGeocode( string address, string components, string bounds, string language, string region, required boolean simple=TRUE ){
+	public struct function getGeocode( string address, string components, string bounds, string language, string region, required boolean simple=TRUE ){
 
 		// Check that we have either an address or components argument
 		if( structKeyExists(arguments,'address') || structKeyExists(arguments,'components') ){
 
 			// Set our properties
-			if( structKeyExists(arguments,'address') )   { setAddress( trim(arguments.address) ); }
-			if( structKeyExists(arguments,'components') ){ setComponents( trim(arguments.components) ); }
-			if( structKeyExists(arguments,'bounds') )    { setBounds( trim(arguments.bounds) ); }
-			if( structKeyExists(arguments,'language') )  { setLanaguage( trim(arguments.language) ); }
-			if( structKeyExists(arguments,'region') )    { setRegion( trim(arguments.region) ); }
+			if( structKeyExists(arguments,'address') )   { setAddress( arguments.address ); }
+			if( structKeyExists(arguments,'components') ){ setComponents( arguments.components ); }
+			if( structKeyExists(arguments,'bounds') )    { setBounds( arguments.bounds ); }
+			if( structKeyExists(arguments,'language') )  { setLanaguage( arguments.language ); }
+			if( structKeyExists(arguments,'region') )    { setRegion( arguments.region ); }
 
-			var request  = doRequest();
+			var request  = makeApiRequest();
 			var response = {};
 
 			// Format a simplified response
@@ -193,13 +190,12 @@ component {
 	 * Performs the API http request. 
 	 * Remember if you're using the HTTPS URL for the API, you may need to add Google's SSL certificate to your java keyring.
 	 * @displayname Do Request
-	 * @returntype  Struct
 	 */
-	private function doRequest(){
+	private struct function makeApiRequest(){
 
 		var http = new http();
-		http.setMethod('get');
-		http.setCharset('utf-8');
+		http.setMethod( 'get' );
+		http.setCharset( 'utf-8' );
 		http.setUrl( createFinalURL() );
 
 		var response = DeserializeJSON( http.send().getPrefix().filecontent );
@@ -216,17 +212,16 @@ component {
 	/**
 	 * Returns a URL string using the property values to build a valid URL for hitting the Google Geocoding API.
 	 * @displayname Create Final URL
-	 * @returntype  String
 	 */
-	private function createFinalURL(){
+	private string function createFinalURL(){
 
-		var url = getEndpoint() & getResponseType() & '?';
+		var url = getEnd_Point() & getResponse_Type() & '?';
 
 		// Do we have an address?
 		if( len( getAddress() ) ){ url &= 'address='& getAddress(); }
 
 		// Do we have a lat,lng pair?
-		if( len( getLatLng() ) ){ url &= 'latlng='& getLatLng(); }
+		if( len( getLat_Lng() ) ){ url &= 'latlng='& getLat_Lng(); }
 
 		// Are we passing components?
 		if( len( getComponents() ) ){ url &= '&components='& getComponents(); }
@@ -241,13 +236,13 @@ component {
 		if( len( getRegion() ) ){ url &= '&region='& getRegion(); }
 
 		// What about a location type?
-		if( len( getLocationType() ) ){ url &= '&location_type='& getLocationType(); }
+		if( len( getLocation_Type() ) ){ url &= '&location_type='& getLocation_Type(); }
 
 		// What about a result type?
-		if( len( getResultType() ) ){ url &= '&result_type='& getResultType(); }
+		if( len( getResult_Type() ) ){ url &= '&result_type='& getResult_Type(); }
 
 		// Do we have an API Key?
-		if( len( getKey() ) ){ url &= '&key='& getKey(); }
+		if( len( getApi_Key() ) ){ url &= '&key='& getApi_Key(); }
 
 		return url;
 	};
