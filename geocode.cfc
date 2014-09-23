@@ -81,11 +81,11 @@ component accessors='true' {
 	 * @response_type The type of response you'd like to see from Google. Defaults to 'json'. Google supports 'json' or 'xml' types.
 	 * @endpoint      The API URL.
 	 */
-	public component function init( required string api_key='', required string response_type='json', required string endpoint='http://maps.googleapis.com/maps/api/geocode/' ){
+	public component function init( string api_key, required string response_type='json', required string endpoint='http://maps.googleapis.com/maps/api/geocode/' ){
 
 		// Set our parameters if their values have been passed through during initialization.
 		// We have to set defaults here because CF9 or earlier doesn't use the default value of a property unless you're using ORM.
-		variables.api_key       = arguments.api_key;
+		if( structKeyExists(arguments, 'api_key') && len(arguments.api_key) ){ variables.api_key = arguments.api_key; }
 		variables.response_type = arguments.response_type;
 		variables.endpoint      = arguments.endpoint;
 
