@@ -1,5 +1,5 @@
 #CF-Google-Geocoding
-CFML wrapper for Google's Geocoding API. Using this component it's pretty easy to get the geocode (latitude/longitude) for a known address. Or, you like, provide the geocode and get the closest matching address. 
+CFML wrapper for Google's Geocoding API. Using this component it's pretty easy to get the geocode (latitude/longitude) for a known address. Or, if you wish, provide the geocode and get the closest matching address. 
 
 To learn more about the Geocoding API from Google checkout https://developers.google.com/maps/documentation/geocoding/. Also, any method parameters not documented to your statisfaction are probably already covered in the API documentation so check the Google docs.
 
